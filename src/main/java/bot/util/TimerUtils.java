@@ -42,7 +42,11 @@ public class TimerUtils {
 
 				while (true) {
 					sleepUntil(t);
-					r.run();
+					try {
+						r.run();
+					} catch (final Exception e) {
+						e.printStackTrace();
+					}
 					t += timeoutMs;
 				}
 			} catch (final InterruptedException e) {

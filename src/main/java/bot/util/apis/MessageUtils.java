@@ -100,14 +100,22 @@ public class MessageUtils {
 	}
 
 	public void sendExceptionToMe(final Exception e) {
-		e.printStackTrace();
-		sendMessageToMe(getFullStackTrace(e));
+		try {
+			e.printStackTrace();
+			sendMessageToMe(getFullStackTrace(e));
+		} catch (final Exception e2) {
+			e2.printStackTrace();
+		}
 	}
 
 	public void sendExceptionToMe(final String msg, final Exception e) {
 		final String exceptionMsg = msg + "\n" + getFullStackTrace(e);
 		System.err.println(exceptionMsg);
-		sendMessageToMe(exceptionMsg);
+		try {
+			sendMessageToMe(exceptionMsg);
+		} catch (final Exception e2) {
+			e2.printStackTrace();
+		}
 	}
 
 	public static CompletableFuture<InteractionOriginalResponseUpdater> sendEphemeralMessage(
