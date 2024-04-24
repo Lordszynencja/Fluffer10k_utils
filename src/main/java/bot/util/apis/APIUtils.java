@@ -21,13 +21,16 @@ public class APIUtils {
 		return s != null && isTestServer(s.getId());
 	}
 
+	public final String botName;
 	public final Config config;
 	public final DiscordApi api;
 	public final CommandHandlers commandHandlers;
 	public final MessageUtils messageUtils;
 	public InitUtils initUtils = new InitUtils();
 
-	public APIUtils(final String configFileName, final List<Intent> privilegedIntentsWanted) throws IOException {
+	public APIUtils(final String botName, final String inviteLink, final String configFileName,
+			final List<Intent> privilegedIntentsWanted) throws IOException {
+		this.botName = botName;
 		config = new Config(configFileName);
 
 		api = new DiscordApiBuilder()//
@@ -38,7 +41,7 @@ public class APIUtils {
 				.join();
 
 		api.setMessageCacheSize(50, 3600);
-		commandHandlers = new CommandHandlers(this);
+		commandHandlers = new CommandHandlers(this, inviteLink);
 		messageUtils = new MessageUtils(this);
 	}
 
@@ -73,7 +76,8 @@ public class APIUtils {
 		api.addMessageComponentCreateListener(commandHandlers::handleMessageComponent);
 
 		final List<String> cmds = commandHandlers.getCmdList();
-		System.out.println("Bot started, cmd count: " + cmds.size() + "\ncmds:" + cmds);
+		System.out.println(botName + " started, cmd count: " + cmds.size() + "\ncmds:" + cmds);
+		messageUtils.sendMessageToMe(botName + " started");
 	}
 
 	public boolean isServerOk(final long serverId) {

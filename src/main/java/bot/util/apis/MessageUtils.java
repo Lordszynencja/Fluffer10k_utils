@@ -15,12 +15,12 @@ import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageBuilder;
+import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.interaction.InteractionBase;
-import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
 
 public class MessageUtils {
@@ -125,8 +125,7 @@ public class MessageUtils {
 
 	public static CompletableFuture<InteractionOriginalResponseUpdater> sendEphemeralMessage(
 			final InteractionBase interaction, final String msg) {
-		return interaction.createImmediateResponder().append(msg).setFlags(InteractionCallbackDataFlag.EPHEMERAL)
-				.respond();
+		return interaction.createImmediateResponder().append(msg).setFlags(MessageFlag.EPHEMERAL).respond();
 	}
 
 	public static List<String> getMentions(final String msg) {

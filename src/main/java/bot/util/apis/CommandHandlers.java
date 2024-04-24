@@ -40,6 +40,7 @@ public class CommandHandlers {
 
 	private static final List<ExitHandler> exitHandlers = new ArrayList<>();
 
+	private final String inviteLink;
 	private final APIUtils apiUtils;
 
 	private final Map<Long, Map<String, SlashCommandHandler>> serverSlashCommandHandlers = new HashMap<>();
@@ -64,7 +65,7 @@ public class CommandHandlers {
 			return;
 		}
 
-		exitMessage = interaction.getOptionStringValueByName("msg").orElse("bug fixes");
+		exitMessage = interaction.getArgumentStringValueByName("msg").orElse("bug fixes");
 		sendEphemeralMessage(interaction, "Exiting, " + exitHandlers.size() + " exit handlers to run").join();
 		for (final ExitHandler handler : exitHandlers) {
 			handler.handle();
@@ -75,13 +76,23 @@ public class CommandHandlers {
 		System.exit(0);
 	}
 
-	public CommandHandlers(final APIUtils apiUtils) {
+	private void handleInviteLink(final SlashCommandInteraction interaction) throws Exception {
+		sendEphemeralMessage(interaction, String.format("Invite link for the %s is: %s", apiUtils.botName, inviteLink))
+				.join();
+	}
+
+	public CommandHandlers(final APIUtils apiUtils, final String inviteLink) {
+		this.inviteLink = inviteLink;
 		this.apiUtils = apiUtils;
 		addedCommands = apiUtils.getCommands();
 
 		addSlashCommandHandler("exit", CommandHandlers::handleExit,
 				SlashCommand.with("exit", "exit the bot (for bot owner only)", //
 						asList(SlashCommandOption.create(SlashCommandOptionType.STRING, "msg", "message", true))));
+		if (inviteLink != null) {
+			addSlashCommandHandler("invite_link", this::handleInviteLink,
+					SlashCommand.with("invite_link", "Get invite link for the bot"));
+		}
 		addMessageComponentHandler("do_nothing", interaction -> interaction.acknowledge());
 	}
 
@@ -130,7 +141,7 @@ public class CommandHandlers {
 	public void addCommandAlias(final String cmd, final String alias, final SlashCommandBuilder slashCommand) {
 		commandAliases.put(alias, cmd);
 		wantedCommands.add(alias);
-		slashCommandBuilders.put(cmd, slashCommand);
+		slashCommandBuilders.put(alias, slashCommand);
 	}
 
 	public void addRefreshedCommand(final String cmd) {
@@ -154,7 +165,7 @@ public class CommandHandlers {
 		apiUtils.api.getGlobalSlashCommands().join().forEach(cmd -> {
 			final String name = cmd.getName();
 			if (!wantedCommands.contains(name)) {
-				cmd.deleteGlobal();
+				cmd.delete();
 				System.out.println("Removed " + name);
 				addedCommands.remove(name);
 			}
