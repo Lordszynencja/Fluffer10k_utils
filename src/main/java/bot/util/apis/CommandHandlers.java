@@ -150,9 +150,7 @@ public class CommandHandlers {
 
 	private void addCommand(final String cmd) {
 		addedCommands.add(cmd);
-		System.out.println("Adding " + cmd);
 		slashCommandBuilders.get(cmd).createGlobal(apiUtils.api).join();
-		System.out.println("Added " + cmd);
 	}
 
 	public void addSlashCommands() {

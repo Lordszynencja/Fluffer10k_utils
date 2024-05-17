@@ -10,7 +10,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.javacord.api.entity.channel.ChannelType;
 import org.javacord.api.entity.channel.PrivateChannel;
+import org.javacord.api.entity.channel.RegularServerChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
@@ -202,13 +204,42 @@ public class MessageUtils {
 				.collect(Collectors.toList());
 	}
 
+	public static TextChannel getServerTextChannel(final InteractionBase interaction) {
+		if (!interaction.getChannel().isPresent()) {
+			return null;
+		}
+
+		final TextChannel channel = interaction.getChannel().get();
+		if (channel.getType() == ChannelType.SERVER_PUBLIC_THREAD
+				|| channel.getType() == ChannelType.SERVER_TEXT_CHANNEL) {
+			return channel;
+		}
+
+		return null;
+	}
+
 	public static boolean isServerTextChannel(final InteractionBase interaction) {
-		return interaction.getChannel().isPresent() && interaction.getChannel().get().asServerTextChannel().isPresent();
+		return getServerTextChannel(interaction) != null;
+	}
+
+	public static Server getServer(final TextChannel channel) {
+		return channel.asServerChannel().map(c -> c.getServer()).orElse(null);
 	}
 
 	public static boolean isNSFWChannel(final InteractionBase interaction) {
-		final Optional<ServerTextChannel> channel = interaction.getChannel().get().asServerTextChannel();
-		return channel.isPresent() && channel.get().isNsfw();
+		final TextChannel channel = getServerTextChannel(interaction);
+		if (channel == null) {
+			return false;
+		}
+
+		if (channel.getType() == ChannelType.SERVER_TEXT_CHANNEL) {
+			return channel.asServerTextChannel().get().isNsfw();
+		} else if (channel.getType() == ChannelType.SERVER_PUBLIC_THREAD) {
+			final RegularServerChannel parentChannel = channel.asServerThreadChannel().get().getParent();
+			return parentChannel.getType() == ChannelType.SERVER_TEXT_CHANNEL
+					&& parentChannel.asServerTextChannel().get().isNsfw();
+		}
+		return false;
 	}
 
 	public Message getMessageByIds(final long channelId, final long messageId) {
