@@ -173,7 +173,8 @@ public class MessageUtils {
 			id = id.substring(1);
 		}
 
-		return apiUtils.api.getUserById(id).join().getDisplayName(server);
+		final User user = apiUtils.api.getUserById(id).join();
+		return APIUtils.getUserName(user, server);
 	}
 
 	public String replaceMentionsWithUserNames(final String msg, final Server server) {

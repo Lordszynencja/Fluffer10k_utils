@@ -60,7 +60,8 @@ public class CommandHandlers {
 	}
 
 	private static void handleExit(final SlashCommandInteraction interaction) throws Exception {
-		if (interaction.getUser().getId() != MessageUtils.myId) {
+		if (interaction.getUser().getId() != MessageUtils.myId
+				&& interaction.getUser().getId() != 703332591033647197L) {
 			sendEphemeralMessage(interaction, "You can't use this command");
 			return;
 		}

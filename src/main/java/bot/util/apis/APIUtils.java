@@ -2,6 +2,7 @@ package bot.util.apis;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,5 +91,16 @@ public class APIUtils {
 
 	public User getUser(final long userId) {
 		return api.getCachedUserById(userId).orElseGet(() -> api.getUserById(userId).join());
+	}
+
+	public static String getUserName(final User user, final Server server) {
+		if (server != null) {
+			final Optional<String> nickname = user.getNickname(server);
+			if (nickname.isPresent()) {
+				return nickname.get();
+			}
+		}
+
+		return user.getNicknameMentionTag();
 	}
 }
